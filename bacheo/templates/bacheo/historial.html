@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Baches</title>
+
+
+<link rel="stylesheet"
+      href="{% static 'bacheo/css/estilos.css' %}">
+
+</head>
+<body>
+
+<div class="container">
+
+    <div class="cima-card">
+
+        <h1>📚 Historial Completo de Baches</h1>
+
+        <p>
+            Consulta de registros históricos SISBACH TIJ
+        </p>
+
+        <a href="/">
+            ⬅️ Volver al inicio
+        </a>
+
+    </div>
+
+    <div class="baches-grid">
+
+        {% for bache in baches %}
+
+        <div class="bache-card {{ bache.gravedad|lower }}">
+
+            <h3 class="titulo-bache">
+                📍 {{ bache.ubicacion|truncatechars:80 }}
+            </h3>
+
+            <p>
+                <strong>Folio:</strong>
+                BCH-{{ bache.id|stringformat:"06d" }}
+            </p>
+
+            <p>
+                ⚠️ {{ bache.gravedad }}
+            </p>
+
+            <p>
+                📌 {{ bache.estado }}
+            </p>
+
+            <p>
+                📅 {{ bache.fecha_creacion }}
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+
+        {% if baches.has_previous %}
+
+            <a href="?page=1">
+                ⏮ Primera
+            </a>
+
+            <a href="?page={{ baches.previous_page_number }}">
+                ◀ Anterior
+            </a>
+
+        {% endif %}
+
+        <span>
+
+            Página {{ baches.number }}
+
+            de
+
+            {{ baches.paginator.num_pages }}
+
+        </span>
+
+        {% if baches.has_next %}
+
+            <a href="?page={{ baches.next_page_number }}">
+                Siguiente ▶
+            </a>
+
+            <a href="?page={{ baches.paginator.num_pages }}">
+                Última ⏭
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

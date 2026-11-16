@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprobante de Reporte</title>
+
+    <link rel="stylesheet"
+          href="{% static 'bacheo/css/estilos.css' %}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="cima-card">
+
+        <h1>✅ REPORTE REGISTRADO</h1>
+        <h2>PRUEBA DE COMPROBANTE</h2>
+
+        <hr>
+
+        <p>
+            <strong>Folio:</strong>
+            BCH-{{ bache.id|stringformat:"06d" }}
+        </p>
+
+        <p>
+            <strong>Ubicación:</strong>
+            {{ bache.ubicacion }}
+        </p>
+
+        <p>
+            <strong>Dirección:</strong>
+            {{ bache.direccion }}
+        </p>
+
+        <p>
+            <strong>Gravedad:</strong>
+            {{ bache.gravedad }}
+        </p>
+
+        <p>
+            <strong>Estado:</strong>
+            {{ bache.estado }}
+        </p>
+
+        <p>
+            <strong>Fecha:</strong>
+            {{ bache.fecha_creacion }}
+        </p>
+
+        <br>
+
+        <button onclick="window.print()">
+            🖨️ Imprimir comprobante
+        </button>
+
+        <a href="/">
+            <button>
+                ⬅️ Volver al inicio
+            </button>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

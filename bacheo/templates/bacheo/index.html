@@ -1,0 +1,485 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+
+ <meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+ <title>SISBACH TIJUANA</title>
+
+ <link rel="stylesheet"
+    href="{% static 'bacheo/css/estilos.css' %}">
+
+ </head>
+<body>
+
+<div class="container">
+
+    <h1>SISBACH TIJUANA</h1>
+    <p class="subtitulo">
+    Sistema de Reporte y Gestión de Baches en Tijuana</p>
+
+    <div class="form-card">
+
+    <h2>🔍 Buscar Baches</h2>
+
+    <form method="GET">
+
+        <input
+            type="text"
+            name="buscar"
+            value="{{ buscar }}"
+            placeholder="Buscar por ubicación">
+
+        <button type="submit">
+            Buscar
+        </button>
+    </form>
+    {% if buscar %}
+
+<div class="resultado-busqueda">
+
+    <p>
+        | RESULTADOS ENCONTRADOS :
+        {{ cantidad_resultados }}
+    </p>
+    {% for bache in baches %}
+    <div class="resultado-item">
+        📍 {{ bache.ubicacion }}
+    </div>
+   {% endfor %}
+ <p> | BACHES REPARADOS : </P>
+ 
+   {% for bache in baches_reparados %}
+    <div class="resultado-item">
+        ✅ {{ bache.ubicacion }}
+    </div>
+   {% endfor %}
+
+     <a href="/" class="btn-limpiar">
+           ❌ Limpiar búsqueda
+     </a>
+</div>
+
+{% endif %}
+
+</div>
+
+    <div class="form-card">
+
+        <h2>✍️ Registrar Bache</h2>
+
+        <form method="POST"
+          enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <input
+                type="text"
+                name="ciudadano_nombre"
+                placeholder="Nombre Completo: "
+                required>
+
+            <input
+                type="text"
+                name="comentario"
+                placeholder="Descripción del reporte: "
+                required>
+
+            <input
+                type="text"
+                name="ubicacion"
+                id="ubicacion"
+                placeholder="Ubicación del bache: 📍"
+                required>
+            
+            <button
+               type="button"
+               id="btnUbicacion">
+              📍 Obtener ubicación actual
+            </button>
+
+            <input
+               type="hidden"
+               name="latitud"
+               id="latitud">
+
+            <input
+              type="hidden"
+              name="longitud"
+              id="longitud">
+
+            <label>Gravedad ⚠️ :</label>
+
+            <select name="gravedad">
+                <option>Baja</option>
+                <option>Media</option>
+                <option>Alta</option>
+                <option>Critica</option>
+            </select>
+
+            <label>Estado actual del bache 🕳️ :</label>
+
+            <select name="estado">
+                <option>Pendiente</option>
+                <option>◌ En Proceso</option>
+                <option>Reparado</option>
+            </select>
+
+            <label>📷 Fotografía del bache:</label>
+
+            <input
+              type="file"
+              name="foto"
+              accept="image/*">
+
+            <button type="submit">
+                Guardar Bache 
+            </button>
+
+        </form>
+
+    </div>
+
+<hr>
+
+<div class="mapa-card">
+
+    <h2>🗺️ Mapa GPS</h2>
+
+    <iframe
+        id="mapaGPS"
+        width="100%"
+        height="350"
+        src="https://maps.google.com/maps?q=32.5149,-117.0382&z=15&output=embed">
+    </iframe>
+
+</div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <p>Baches Reportados: </p>
+            <h3>{{ total_baches }}</h3>
+        </div>
+
+        <div class="stat-card">
+            <p>⏳ Pendientes: </p>
+            <h3>{{ total_pendientes }}</h3>
+        </div>
+
+        <div class="stat-card"> 
+            <p>✅ Reparados: </p>
+            <h3>{{ total_reparados }}</h3>
+        </div>
+
+        <div class="stat-card">
+            <p>📈 Total de Reportes:</p>
+            <h3>{{ total_reportes }}</h3>
+        </div>
+
+    </div>
+
+<hr>
+
+    <div class="cima-card">
+
+        <h2> ULTIMO BACHE AGREGADO </h2>
+        <div class="cima-info">
+        <p>⭐ <strong>Prioridad:</strong>{{ cima.prioridad }}</p>
+
+        <p>📊 Reportes:{{ cima.reportes.count }}</p>
+
+        {% if cima %}
+
+        <p>
+            {{ cima.ubicacion }}
+            <strong>Folio:</strong> BCH-{{ cima.id|stringformat:"06d" }}
+        </p>
+        <p>
+          🗺️ {{ cima.direccion }}
+        </p>
+
+        <p>
+            {{ cima.gravedad }} | {{ cima.estado }}
+        </p>
+
+        {% endif %}
+
+        <form method="POST" action="/atender/">
+            {% csrf_token %}
+            <button type="submit">
+                ATENDER BACHE (POP)
+            </button>
+        </form>
+        </div>
+    </div>
+
+<hr>
+
+    <h2>🚧 Baches Pendientes</h2>
+
+ <a href="/historial/" class="btn-historial">
+     Ver historial completo
+ </a>
+
+<div class="baches-grid">
+
+{% for bache in baches %}
+
+<div class="bache-card gravedad-{{ bache.gravedad }}">
+
+    <h3 class="titulo-bache">
+     📍 {{ bache.direccion|truncatechars:80 }}
+    </h3>
+
+    <p>
+        <strong>Folio:</strong> BCH-{{ bache.id|stringformat:"06d" }}
+    </p>
+
+    <span class="badge gravedad-badge">
+           <strong>{{ bache.gravedad }}</strong>
+    </span>
+
+    <details>
+    <summary>Ver coordenadas GPS</summary>
+     <p>
+       <strong>Latitud:</strong> {{ bache.latitud }}
+     </p>
+
+     <p>
+       <strong>Longitud:</strong> {{ bache.longitud }}
+     </p> 
+    </details>
+
+    <p>
+        <strong>Estado:</strong> {{ bache.estado }}
+    </p>
+
+<div class="prioridad-box">
+    ⭐ <strong>Prioridad:</strong>
+    {{ bache.prioridad }}
+</div>
+
+<div class="contador-reportes">
+    📊 {{ bache.reportes.count }} reportes
+</div>
+
+    <p>
+        📅 {{ bache.fecha_creacion }}
+    </p>
+
+    <button
+     type="button"
+     class="btn-mapa"
+     onclick="
+     document.getElementById('mapaGPS').src=
+     'https://maps.google.com/maps?q={{ bache.latitud }},{{ bache.longitud }}&z=17&output=embed'
+     ">
+
+     🗺️ Ver ubicación en mapa
+     </button>
+
+
+    {% for reporte in bache.reportes.all|slice:":3" %}
+
+     <div class="reporte-card">
+        <p>👤: {{ reporte.ciudadano_nombre }}</p>
+        <p>💬: {{ reporte.comentario }}</p>
+        {% if bache.reportes.count > 3 %}
+        <p>Mostrando últimos 3 de{{ bache.reportes.count }} reportes</p>
+        {% endif %}
+{% if reporte.foto %}
+        <img
+            src="{{ reporte.foto.url }}"
+            alt="Fotografía del bache"
+            class="foto-bache"
+            onclick="abrirFoto(this.src)">
+
+{% endif %}
+     </div>
+
+    {% endfor %}
+
+    <p>Total comentarios:{{ bache.reportes.count }}</p>
+
+    <hr>
+</div>
+
+{% empty %}
+
+<p>No existen baches registrados.</p>
+
+{% endfor %}
+
+</div>
+
+<hr>
+
+<h2>✅ Baches Reparados</h2>
+
+<div class="baches-grid">
+
+{% for bache in baches_reparados %}
+
+<div class="bache-card reparado">
+
+    <h3>📍 {{ bache.ubicacion }}</h3>
+
+    <p>
+        <strong>Folio:</strong> BCH-{{ bache.id|stringformat:"06d"}}
+    </p>
+
+    <span class="badge gravedad-badge">
+          <strong> {{ bache.gravedad }}</strong>
+    </span>
+
+
+    <p style="color:#059669;font-weight:bold;">
+        ✔️ Reparado
+    </p>
+
+    <p>
+        ⭐ <strong>Prioridad:</strong>
+        {{ bache.prioridad }}
+    </p>
+
+    <p>
+        📅 <strong>Fecha de reparación:</strong>
+        {{ bache.fecha_reparacion }}
+    </p>
+
+    <p>
+        📊<strong> Reportes:</strong>
+        {{ bache.reportes.count }}
+    </p>
+
+</div>
+
+{% empty %}
+
+
+
+<div class="card">
+    <p>No hay baches reparados.</p>
+</div>
+
+{% endfor %}
+
+</div>
+<hr>
+<footer>
+
+SISBACH TIJUANA © 2026
+Sistema de Reporte y Gestión de Baches
+
+</footer>
+<div id="modalFoto" class="modal-foto">
+
+    <span class="cerrar-modal">&times;</span>
+
+    <img id="imagenModal">
+
+</div>
+
+<script>
+
+function abrirFoto(src){
+
+    document.getElementById(
+        "modalFoto"
+    ).style.display="block";
+
+    document.getElementById(
+        "imagenModal"
+    ).src=src;
+
+}
+
+document.querySelector(
+    ".cerrar-modal"
+).onclick=function(){
+
+    document.getElementById(
+        "modalFoto"
+    ).style.display="none";
+
+}
+
+window.onclick=function(event){
+
+    let modal=
+    document.getElementById(
+        "modalFoto"
+    );
+
+    if(event.target==modal){
+
+        modal.style.display="none";
+
+    }
+
+}
+
+document.getElementById(
+    "btnUbicacion"
+).addEventListener(
+    "click",
+    function(){
+
+        if(navigator.geolocation){
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(posicion){
+
+                    document.getElementById(
+                        "latitud"
+                    ).value =
+                    posicion.coords.latitude;
+
+                    document.getElementById(
+                        "longitud"
+                    ).value =
+                    posicion.coords.longitude;
+
+                    document.getElementById(
+                        "ubicacion"
+                    ).value =
+                    "Lat: " +
+                    posicion.coords.latitude +
+                    ", Lon: " +
+                    posicion.coords.longitude;
+
+                    document.getElementById(
+                        "mapaGPS"
+                    ).src =
+                    "https://maps.google.com/maps?q=" +
+                    posicion.coords.latitude +
+                    "," +
+                    posicion.coords.longitude +
+                    "&z=17&output=embed";
+
+                    alert(
+                        "Ubicación obtenida correctamente"
+                    );
+
+                },
+
+                function(){
+
+                    alert(
+                        "No fue posible obtener la ubicación"
+                    );
+
+                }
+
+            );
+
+        }
+
+    }
+);
+</script>
